@@ -1,0 +1,11 @@
+{
+    "AppSyncApiName": "amplifygroupstoragee",
+    "DynamoDBBillingMode": "PAY_PER_REQUEST",
+    "DynamoDBEnableServerSideEncryption": false,
+    "AuthCognitoUserPoolId": {
+        "Fn::GetAtt": [
+            "authamplifygroupstoragee784ee6fb",
+            "Outputs.UserPoolId"
+        ]
+    }
+}

@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "storage": {
+      "s325f98bc9": [
+        "create",
+        "read",
+        "update",
+        "delete"
+      ]
+    },
+    "api": {
+      "amplifygroupstoragee": [
+        "create",
+        "read",
+        "update",
+        "delete"
+      ]
+    }
+  },
+  "lambdaLayers": []
+}

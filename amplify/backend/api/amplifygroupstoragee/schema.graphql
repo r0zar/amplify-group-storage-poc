@@ -1,0 +1,30 @@
+type File
+  @model(subscriptions: null)
+  @auth(
+    rules: [
+      {
+        allow: private
+        provider: iam
+        operations: [create, update, delete, read]
+      }
+    ]
+  ) {
+  id: ID!
+  name: String!
+  description: String
+  url: AWSURL
+}
+
+# type Mutation {
+#   shareFile(input: FileUserData): String
+#     @function(name: "amplifygroupstoragee69518006-${env}")
+# }
+
+type Query {
+  readFile(input: FileData): String
+    @function(name: "amplifygroupstoragee69518006-${env}")
+}
+
+input FileData {
+  id: ID
+}
