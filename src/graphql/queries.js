@@ -13,6 +13,7 @@ export const getFile = /* GraphQL */ `
       name
       description
       url
+      s3Path
       createdAt
       updatedAt
     }
@@ -30,6 +31,7 @@ export const listFiles = /* GraphQL */ `
         name
         description
         url
+        s3Path
         createdAt
         updatedAt
       }

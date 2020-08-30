@@ -11,6 +11,7 @@ export const createFile = /* GraphQL */ `
       name
       description
       url
+      s3Path
       createdAt
       updatedAt
     }
@@ -26,6 +27,7 @@ export const updateFile = /* GraphQL */ `
       name
       description
       url
+      s3Path
       createdAt
       updatedAt
     }
@@ -41,6 +43,7 @@ export const deleteFile = /* GraphQL */ `
       name
       description
       url
+      s3Path
       createdAt
       updatedAt
     }

@@ -4,15 +4,14 @@
 	STORAGE_S325F98BC9_BUCKETNAME
 Amplify Params - DO NOT EDIT */
 
-const AWS = require('aws-sdk');
-const https = require('https');
-const urlParse = require('url').URL;
-const {
-  getFile,
-} = require('./graphql/queries');
+const AWS = require("aws-sdk");
+const https = require("https");
+const urlParse = require("url").URL;
+const { getFile } = require("./graphql/queries");
 
 const REGION = process.env.REGION;
-const GRAPHQL_API_ENDPOINT = process.env.API_AMPLIFYGROUPSTORAGEE_GRAPHQLAPIENDPOINTOUTPUT;
+const GRAPHQL_API_ENDPOINT =
+  process.env.API_AMPLIFYGROUPSTORAGEE_GRAPHQLAPIENDPOINTOUTPUT;
 const ENDPOINT = new urlParse(GRAPHQL_API_ENDPOINT).hostname.toString();
 if (!GRAPHQL_API_ENDPOINT) {
   throw new Error(
@@ -22,17 +21,17 @@ if (!GRAPHQL_API_ENDPOINT) {
 
 const gql = async (query, operationName, variables) => {
   const req = new AWS.HttpRequest(GRAPHQL_API_ENDPOINT, REGION);
-  req.method = 'POST';
+  req.method = "POST";
   req.headers.host = ENDPOINT;
-  req.headers['Content-Type'] = 'application/json';
+  req.headers["Content-Type"] = "application/json";
   req.body = JSON.stringify({ query, operationName, variables });
 
-  const signer = new AWS.Signers.V4(req, 'appsync', true);
+  const signer = new AWS.Signers.V4(req, "appsync", true);
   signer.addAuthorization(AWS.config.credentials, AWS.util.date.getDate());
 
   const { data, errors } = await new Promise((resolve, reject) => {
     const httpRequest = https.request({ ...req, host: ENDPOINT }, (result) => {
-      result.on('data', (data) => {
+      result.on("data", (data) => {
         resolve(JSON.parse(data.toString()));
       });
     });
@@ -42,28 +41,24 @@ const gql = async (query, operationName, variables) => {
   return { data, errors };
 };
 
-
 /**
  * Using this as the entry point, you can use a single function to handle many resolvers.
  */
 const resolvers = {
-  Mutation: {
-  },
+  Mutation: {},
   Query: {
     readFile: async (ctx) => {
-      
       const { data, errors } = await gql(
         getFile,
-        'GetFile',
+        "GetFile",
         ctx.arguments.input
       );
-      
-      console.log(data, errors)
-      return 'data!';
-    },
-  }
-};
 
+      console.log(data, errors);
+      return "data!";
+    },
+  },
+};
 
 var s3 = new AWS.S3();
 
@@ -78,26 +73,29 @@ var s3 = new AWS.S3();
 //   "prev": { /* If using the built-in pipeline resolver support, this contains the object returned by the previous function. */ },
 // }
 exports.handler = async (event) => {
-  console.log(event)
-  if (event.httpMethod == 'GET') {
-      /* The following example retrieves an object for an S3 bucket. */
-      var params = {
-        Bucket: "amplifygroupstoragee1165375f8ede460faf0d4137d8d132204-dev", 
-        Key: "private/us-east-1:38d74904-2cdc-43e8-b37e-5fc4eea849b4/download.png"
-      };
-      var origimage = await s3.getObject(params).promise();
-      
-      console.log(origimage)
-      
-      var response = {
-        
-          headers: { "Content-Type": 'blob' },
-          statusCode: 200,
-          body: "data:"+ origimage.ContentType +";base64,"+origimage.Body.toString('base64'),
-          isBase64Encoded: true
-         
-      };
-      return response;
+  console.log(event);
+  if (event.httpMethod == "GET") {
+    console.log(event.pathParameters.proxy);
+    /* The following example retrieves an object for an S3 bucket. */
+    var params = {
+      Bucket: "amplifygroupstoragee1165375f8ede460faf0d4137d8d132204-dev",
+      Key: event.pathParameters.proxy,
+    };
+    var origimage = await s3.getObject(params).promise();
+
+    console.log(origimage);
+
+    var response = {
+      headers: { "Content-Type": "blob" },
+      statusCode: 200,
+      body:
+        "data:" +
+        origimage.ContentType +
+        ";base64," +
+        origimage.Body.toString("base64"),
+      isBase64Encoded: true,
+    };
+    return response;
   } else {
     const typeHandler = resolvers[event.typeName];
     if (typeHandler) {
@@ -106,6 +104,6 @@ exports.handler = async (event) => {
         return await resolver(event);
       }
     }
-    throw new Error('Resolver not found.');
+    throw new Error("Resolver not found.");
   }
 };

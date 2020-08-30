@@ -2,6 +2,10 @@ type File
   @model(subscriptions: null)
   @auth(
     rules: [
+      { 
+        allow: owner
+        operations: [create, update, delete, read]
+      },
       {
         allow: private
         provider: iam
@@ -13,6 +17,7 @@ type File
   name: String!
   description: String
   url: AWSURL
+  s3Path: String
 }
 
 # type Mutation {
