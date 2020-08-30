@@ -14,6 +14,8 @@ export const getFile = /* GraphQL */ `
       description
       url
       s3Path
+      owner
+      viewers
       createdAt
       updatedAt
     }
@@ -32,6 +34,8 @@ export const listFiles = /* GraphQL */ `
         description
         url
         s3Path
+        owner
+        viewers
         createdAt
         updatedAt
       }

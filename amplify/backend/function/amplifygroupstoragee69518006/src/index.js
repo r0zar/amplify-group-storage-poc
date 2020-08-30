@@ -7,7 +7,7 @@ Amplify Params - DO NOT EDIT */
 const AWS = require("aws-sdk");
 const https = require("https");
 const urlParse = require("url").URL;
-// const { getFile } = require("./graphql/queries");
+const { listFiles } = require("./graphql/queries");
 
 const REGION = process.env.REGION;
 const GRAPHQL_API_ENDPOINT =
@@ -54,15 +54,41 @@ const resolvers = {
 
 exports.handler = async (event) => {
   // API GATEWAY
-  // TODO: add path check to if logic
-  if (event.httpMethod == "GET") {
+  if (event.resource == "/files/{proxy+}" && event.httpMethod == "GET") {
     var params = {
       Bucket: BUCKET,
       Key: event.pathParameters.proxy,
     };
+
     // authorize the request
+    // TODO: verify JWT
+    // https://github.com/awslabs/aws-support-tools/blob/master/Cognito/decode-verify-jwt/decode-verify-jwt.ts
+    // identify requesting user
+    const requestingUserID = event.requestContext.identity.cognitoAuthenticationProvider.split(
+      ":CognitoSignIn:"
+    )[1];
+    console.log(requestingUserID);
+
     // lookup file where proxy == s3Path
+    const { data, errors } = await gql(listFiles, "ListFiles", {
+      filter: { s3Path: { eq: event.pathParameters.proxy } },
+    });
+    const requestedFile = data.listFiles.items[0];
+    console.log(requestedFile);
+
     // check if requester is a file owner/viewer
+    if (requestedFile.owner == requestingUserID) {
+      console.log("Owner is requesting their own file");
+    } else if (
+      requestedFile.viewers &&
+      requestedFile.viewers.some((id) => id == requestingUserID)
+    ) {
+      console.log("Viewer is requesting a file shared with them");
+    } else {
+      console.error("File access request failed authorization");
+      return { statusCode: 401, body: "Not authorized" };
+    }
+
     var origimage = await s3.getObject(params).promise();
 
     var response = {
@@ -76,6 +102,9 @@ exports.handler = async (event) => {
       isBase64Encoded: true,
     };
     return response;
+  } else {
+    console.error("Unknown request received");
+    return { statusCode: 405, body: "Method Not Allowed" };
   }
 
   // GRAPHQL

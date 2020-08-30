@@ -22,6 +22,9 @@ exports.getFile = `
       name
       description
       url
+      s3Path
+      owner
+      viewers
       createdAt
       updatedAt
     }
@@ -41,6 +44,9 @@ exports.listFiles = `
         name
         description
         url
+        s3Path
+        owner
+        viewers
         createdAt
         updatedAt
       }

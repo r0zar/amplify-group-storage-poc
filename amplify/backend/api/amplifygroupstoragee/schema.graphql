@@ -1,23 +1,26 @@
 type File
-  @model(subscriptions: null)
-  @auth(
-    rules: [
-      { 
-        allow: owner
-        operations: [create, update, delete, read]
-      },
-      {
-        allow: private
-        provider: iam
-        operations: [create, update, delete, read]
-      }
-    ]
-  ) {
+@model(subscriptions: null)
+@auth(
+  rules: [
+    {
+      allow: owner
+      ownerField: "owner"
+      operations: [create, update, delete, read]
+    }
+    {
+      allow: private
+      provider: iam
+      operations: [create, update, delete, read]
+    }
+  ]
+) {
   id: ID!
   name: String!
   description: String
   url: AWSURL
   s3Path: String
+  owner: ID
+  viewers: [ID]
 }
 
 # type Mutation {
@@ -27,7 +30,7 @@ type File
 
 type Query {
   readFile(input: FileData): String
-    @function(name: "amplifygroupstoragee69518006-${env}")
+  @function(name: "amplifygroupstoragee69518006-${env}")
 }
 
 input FileData {

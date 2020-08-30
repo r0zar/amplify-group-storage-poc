@@ -18,6 +18,9 @@ exports.createFile = `
       name
       description
       url
+      s3Path
+      owner
+      viewers
       createdAt
       updatedAt
     }
@@ -35,6 +38,9 @@ exports.updateFile = `
       name
       description
       url
+      s3Path
+      owner
+      viewers
       createdAt
       updatedAt
     }
@@ -52,6 +58,9 @@ exports.deleteFile = `
       name
       description
       url
+      s3Path
+      owner
+      viewers
       createdAt
       updatedAt
     }

@@ -12,6 +12,8 @@ export const createFile = /* GraphQL */ `
       description
       url
       s3Path
+      owner
+      viewers
       createdAt
       updatedAt
     }
@@ -28,6 +30,8 @@ export const updateFile = /* GraphQL */ `
       description
       url
       s3Path
+      owner
+      viewers
       createdAt
       updatedAt
     }
@@ -44,6 +48,8 @@ export const deleteFile = /* GraphQL */ `
       description
       url
       s3Path
+      owner
+      viewers
       createdAt
       updatedAt
     }
