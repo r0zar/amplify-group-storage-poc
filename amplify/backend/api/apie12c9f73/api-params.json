@@ -1,0 +1,37 @@
+{
+    "paths": [
+        {
+            "name": "/files",
+            "lambdaFunction": "amplifygroupstoragee69518006",
+            "privacy": {
+                "private": true,
+                "auth": [
+                    "/GET"
+                ]
+            }
+        }
+    ],
+    "resourceName": "apie12c9f73",
+    "apiName": "apie12c9f73",
+    "functionArns": [
+        {
+            "lambdaFunction": "amplifygroupstoragee69518006"
+        }
+    ],
+    "privacy": {
+        "auth": 1,
+        "unauth": 0,
+        "authRoleName": "amplify-amplifygroupstoragee-dev-132204-authRole",
+        "unAuthRoleName": "amplify-amplifygroupstoragee-dev-132204-unauthRole"
+    },
+    "dependsOn": [
+        {
+            "category": "function",
+            "resourceName": "amplifygroupstoragee69518006",
+            "attributes": [
+                "Name",
+                "Arn"
+            ]
+        }
+    ]
+}

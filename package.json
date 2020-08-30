@@ -10,7 +10,9 @@
     "codegen": "cd amplify/backend/function/amplifygroupstoragee69518006/src && npm run codegen && cd ../../../../.."
   },
   "dependencies": {
+    "@aws-amplify/ui-react": "^0.2.15",
     "@material-ui/core": "latest",
+    "aws-amplify": "^3.0.24",
     "clsx": "latest",
     "react": "latest",
     "react-dom": "latest",

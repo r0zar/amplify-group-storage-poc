@@ -42,6 +42,7 @@ const gql = async (query, operationName, variables) => {
   return { data, errors };
 };
 
+
 /**
  * Using this as the entry point, you can use a single function to handle many resolvers.
  */
@@ -50,15 +51,21 @@ const resolvers = {
   },
   Query: {
     readFile: async (ctx) => {
+      
       const { data, errors } = await gql(
         getFile,
         'GetFile',
         ctx.arguments.input
       );
-      return 'done!';
+      
+      console.log(data, errors)
+      return 'data!';
     },
   }
 };
+
+
+var s3 = new AWS.S3();
 
 // event
 // {
@@ -71,12 +78,34 @@ const resolvers = {
 //   "prev": { /* If using the built-in pipeline resolver support, this contains the object returned by the previous function. */ },
 // }
 exports.handler = async (event) => {
-  const typeHandler = resolvers[event.typeName];
-  if (typeHandler) {
-    const resolver = typeHandler[event.fieldName];
-    if (resolver) {
-      return await resolver(event);
+  console.log(event)
+  if (event.httpMethod == 'GET') {
+      /* The following example retrieves an object for an S3 bucket. */
+      var params = {
+        Bucket: "amplifygroupstoragee1165375f8ede460faf0d4137d8d132204-dev", 
+        Key: "private/us-east-1:38d74904-2cdc-43e8-b37e-5fc4eea849b4/download.png"
+      };
+      var origimage = await s3.getObject(params).promise();
+      
+      console.log(origimage)
+      
+      var response = {
+        
+          headers: { "Content-Type": 'blob' },
+          statusCode: 200,
+          body: "data:"+ origimage.ContentType +";base64,"+origimage.Body.toString('base64'),
+          isBase64Encoded: true
+         
+      };
+      return response;
+  } else {
+    const typeHandler = resolvers[event.typeName];
+    if (typeHandler) {
+      const resolver = typeHandler[event.fieldName];
+      if (resolver) {
+        return await resolver(event);
+      }
     }
+    throw new Error('Resolver not found.');
   }
-  throw new Error('Resolver not found.');
 };
