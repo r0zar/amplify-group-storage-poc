@@ -7,17 +7,20 @@ Amplify Params - DO NOT EDIT */
 const AWS = require("aws-sdk");
 const https = require("https");
 const urlParse = require("url").URL;
-const { getFile } = require("./graphql/queries");
+// const { getFile } = require("./graphql/queries");
 
 const REGION = process.env.REGION;
 const GRAPHQL_API_ENDPOINT =
   process.env.API_AMPLIFYGROUPSTORAGEE_GRAPHQLAPIENDPOINTOUTPUT;
+const BUCKET = process.env.STORAGE_S325F98BC9_BUCKETNAME;
 const ENDPOINT = new urlParse(GRAPHQL_API_ENDPOINT).hostname.toString();
 if (!GRAPHQL_API_ENDPOINT) {
   throw new Error(
     `Function requires environment variable: 'API_AMPLIFYGROUPSTORAGEE_GRAPHQLAPIENDPOINTOUTPUT'`
   );
 }
+
+const s3 = new AWS.S3();
 
 const gql = async (query, operationName, variables) => {
   const req = new AWS.HttpRequest(GRAPHQL_API_ENDPOINT, REGION);
@@ -46,44 +49,21 @@ const gql = async (query, operationName, variables) => {
  */
 const resolvers = {
   Mutation: {},
-  Query: {
-    readFile: async (ctx) => {
-      const { data, errors } = await gql(
-        getFile,
-        "GetFile",
-        ctx.arguments.input
-      );
-
-      console.log(data, errors);
-      return "data!";
-    },
-  },
+  Query: {},
 };
 
-var s3 = new AWS.S3();
-
-// event
-// {
-//   "typeName": "Mutation", /* Filled dynamically based on @function usage location */
-//   "fieldName": "addUserToOrganization", /* Filled dynamically based on @function usage location */
-//   "arguments": { /* GraphQL field arguments via $ctx.arguments */ },
-//   "identity": { /* AppSync identity object via $ctx.identity */ },
-//   "source": { /* The object returned by the parent resolver. E.G. if resolving field 'Post.comments', the source is the Post object. */ },
-//   "request": { /* AppSync request object. Contains things like headers. */ },
-//   "prev": { /* If using the built-in pipeline resolver support, this contains the object returned by the previous function. */ },
-// }
 exports.handler = async (event) => {
-  console.log(event);
+  // API GATEWAY
+  // TODO: add path check to if logic
   if (event.httpMethod == "GET") {
-    console.log(event.pathParameters.proxy);
-    /* The following example retrieves an object for an S3 bucket. */
     var params = {
-      Bucket: "amplifygroupstoragee1165375f8ede460faf0d4137d8d132204-dev",
+      Bucket: BUCKET,
       Key: event.pathParameters.proxy,
     };
+    // authorize the request
+    // lookup file where proxy == s3Path
+    // check if requester is a file owner/viewer
     var origimage = await s3.getObject(params).promise();
-
-    console.log(origimage);
 
     var response = {
       headers: { "Content-Type": "blob" },
@@ -96,7 +76,20 @@ exports.handler = async (event) => {
       isBase64Encoded: true,
     };
     return response;
-  } else {
+  }
+
+  // GRAPHQL
+  // event
+  // {
+  //   "typeName": "Mutation", /* Filled dynamically based on @function usage location */
+  //   "fieldName": "addUserToOrganization", /* Filled dynamically based on @function usage location */
+  //   "arguments": { /* GraphQL field arguments via $ctx.arguments */ },
+  //   "identity": { /* AppSync identity object via $ctx.identity */ },
+  //   "source": { /* The object returned by the parent resolver. E.G. if resolving field 'Post.comments', the source is the Post object. */ },
+  //   "request": { /* AppSync request object. Contains things like headers. */ },
+  //   "prev": { /* If using the built-in pipeline resolver support, this contains the object returned by the previous function. */ },
+  // }
+  if (event.typeName) {
     const typeHandler = resolvers[event.typeName];
     if (typeHandler) {
       const resolver = typeHandler[event.fieldName];
