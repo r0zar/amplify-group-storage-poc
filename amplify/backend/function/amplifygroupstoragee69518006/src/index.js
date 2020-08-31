@@ -35,7 +35,10 @@ const gql = async (query, operationName, variables) => {
   const { data, errors } = await new Promise((resolve, reject) => {
     const httpRequest = https.request({ ...req, host: ENDPOINT }, (result) => {
       result.on("data", (data) => {
-        resolve(JSON.parse(data.toString()));
+        const a = data.toString();
+        console.log(a);
+        const b = JSON.parse(a);
+        resolve(b);
       });
     });
     httpRequest.write(req.body);
@@ -55,9 +58,10 @@ const resolvers = {
 exports.handler = async (event) => {
   // API GATEWAY
   if (event.resource == "/files/{proxy+}" && event.httpMethod == "GET") {
+    const proxy = event.pathParameters.proxy;
     var params = {
       Bucket: BUCKET,
-      Key: event.pathParameters.proxy,
+      Key: proxy,
     };
 
     // authorize the request
@@ -67,14 +71,15 @@ exports.handler = async (event) => {
     const requestingUserID = event.requestContext.identity.cognitoAuthenticationProvider.split(
       ":CognitoSignIn:"
     )[1];
-    console.log(requestingUserID);
+    console.log("requestingUserID", requestingUserID);
 
     // lookup file where proxy == s3Path
     const { data, errors } = await gql(listFiles, "ListFiles", {
-      filter: { s3Path: { eq: event.pathParameters.proxy } },
+      filter: { s3Path: { eq: proxy } },
     });
+    console.log("results", data.listFiles.items);
     const requestedFile = data.listFiles.items[0];
-    console.log(requestedFile);
+    console.log("requestedFile", requestedFile);
 
     // check if requester is a file owner/viewer
     if (requestedFile.owner == requestingUserID) {
@@ -102,9 +107,6 @@ exports.handler = async (event) => {
       isBase64Encoded: true,
     };
     return response;
-  } else {
-    console.error("Unknown request received");
-    return { statusCode: 405, body: "Method Not Allowed" };
   }
 
   // GRAPHQL

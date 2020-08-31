@@ -7,6 +7,7 @@ type File
       ownerField: "owner"
       operations: [create, update, delete, read]
     }
+    { allow: owner, ownerField: "viewers", operations: [read] }
     {
       allow: private
       provider: iam
@@ -18,7 +19,7 @@ type File
   name: String!
   description: String
   url: AWSURL
-  s3Path: String
+  s3Path: String!
   owner: ID
   viewers: [ID]
 }
@@ -28,11 +29,11 @@ type File
 #     @function(name: "amplifygroupstoragee69518006-${env}")
 # }
 
-type Query {
-  readFile(input: FileData): String
-  @function(name: "amplifygroupstoragee69518006-${env}")
-}
+# type Query {
+#   readFile(input: FileData): String
+#   @function(name: "amplifygroupstoragee69518006-${env}")
+# }
 
-input FileData {
-  id: ID
-}
+# input FileData {
+#   id: ID
+# }
