@@ -55,6 +55,7 @@ const StyledBadge = withStyles((theme) => ({
 
 export default withAuthenticator(function App() {
   const [files, setFiles] = React.useState([]);
+  const [fileShared, setFileShared] = React.useState(false);
 
   const getBlob = async (id) => {
     const file = await readFile(id);
@@ -77,7 +78,7 @@ export default withAuthenticator(function App() {
   };
 
   const addViewer = async () => {
-    const data = await updateMyFile({
+    await updateMyFile({
       id: files[0].id,
       viewers: ["67ffa893-d20f-452a-a4a6-d7e48ce38a1c"],
     });
@@ -146,13 +147,15 @@ export default withAuthenticator(function App() {
             >
               Load My Files
             </Button>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={() => addViewer()}
-            >
-              Add viewer to File
-            </Button>
+            {files[0] && !files[0].viewers ? (
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => addViewer()}
+              >
+                Add viewer to File
+              </Button>
+            ) : null}
             <S3ImageUpload setFile={(file) => getData(file)} />
           </Grid>
         </Grid>
