@@ -7,10 +7,9 @@ Amplify.configure(awsExports);
 export const newFile = async ({ key, url }) => {
   const credentials = await Auth.currentCredentials();
   const input = {
+    id: `private/${credentials.identityId}/${key}`,
     name: key,
     description: "test",
-    url: url,
-    s3Path: `private/${credentials.identityId}/${key}`,
   };
   const { data, errors } = await API.graphql(
     graphqlOperation(createFile, { input })

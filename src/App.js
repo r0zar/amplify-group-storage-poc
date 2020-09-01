@@ -18,6 +18,7 @@ import {
   Fab,
 } from "@material-ui/core";
 import CloudUpload from "@material-ui/icons/CloudUpload";
+import Description from "@material-ui/icons/Description";
 import { AvatarGroup } from "@material-ui/lab";
 import { readFile, getMyFiles, updateMyFile } from "./api";
 import { makeStyles, withStyles } from "@material-ui/core/styles";
@@ -59,11 +60,16 @@ export default withAuthenticator(function App() {
 
   const getBlob = async (id) => {
     const file = await readFile(id);
-    const blob = await API.get("apie12c9f73", "/files/" + file.s3Path, {
+    const blob = await API.get("apie12c9f73", "/files/" + file.id, {
       responseType: "blob",
+      headers: { Accept: "*/*" },
     });
     console.log(file, blob);
     return blob;
+  };
+
+  const buildDataURL = async (blob) => {
+    return `data:${blob.type};base64,${await blob.text()}`;
   };
 
   const getData = async (file) => {
@@ -71,7 +77,7 @@ export default withAuthenticator(function App() {
     setFiles(
       files.concat({
         id: file.id,
-        src: await blob.text(),
+        src: await buildDataURL(blob),
         viewers: file.viewers,
       })
     );
@@ -89,7 +95,18 @@ export default withAuthenticator(function App() {
     const myFiles = await getMyFiles({});
     const fileList = myFiles.items.map(async (file) => {
       const blob = await getBlob(file.id);
-      return { id: file.id, src: await blob.text(), viewers: file.viewers };
+      const src = await buildDataURL(blob);
+      // if (blob.type == "application/pdf") {
+      //   let pdfWindow = window.open("");
+      //   pdfWindow.document.write(
+      //     "<iframe width='100%' height='100%' src='" + src + "'></iframe>"
+      //   );
+      // }
+      return {
+        id: file.id,
+        src: src,
+        viewers: file.viewers,
+      };
     });
     setFiles(await Promise.all(fileList));
   };
@@ -123,7 +140,9 @@ export default withAuthenticator(function App() {
                   <Avatar
                     src={file.src}
                     style={{ width: "100px", height: "100px" }}
-                  />
+                  >
+                    <Description />
+                  </Avatar>
                 </StyledBadge>
               ))}
             </AvatarGroup>

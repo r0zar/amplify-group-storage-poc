@@ -17,7 +17,6 @@ exports.createFile = `
       id
       name
       description
-      url
       s3Path
       owner
       viewers
@@ -37,7 +36,6 @@ exports.updateFile = `
       id
       name
       description
-      url
       s3Path
       owner
       viewers
@@ -57,7 +55,6 @@ exports.deleteFile = `
       id
       name
       description
-      url
       s3Path
       owner
       viewers

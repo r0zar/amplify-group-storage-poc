@@ -23,7 +23,7 @@ const S3ImageUpload = ({ setFile }) => {
       <CloudUpload color="secondary" />
       <Input
         type="file"
-        accept="image/*"
+        accept="*/*"
         onChange={(e) => onChange(e)}
         style={{ display: "none" }}
       />

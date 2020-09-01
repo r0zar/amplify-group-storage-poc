@@ -7,7 +7,7 @@ Amplify Params - DO NOT EDIT */
 const AWS = require("aws-sdk");
 const https = require("https");
 const urlParse = require("url").URL;
-const { listFiles } = require("./graphql/queries");
+const { getFile } = require("./graphql/queries");
 
 const REGION = process.env.REGION;
 const GRAPHQL_API_ENDPOINT =
@@ -36,7 +36,6 @@ const gql = async (query, operationName, variables) => {
     const httpRequest = https.request({ ...req, host: ENDPOINT }, (result) => {
       result.on("data", (data) => {
         const a = data.toString();
-        console.log(a);
         const b = JSON.parse(a);
         resolve(b);
       });
@@ -58,28 +57,24 @@ const resolvers = {
 exports.handler = async (event) => {
   // API GATEWAY
   if (event.resource == "/files/{proxy+}" && event.httpMethod == "GET") {
-    const proxy = event.pathParameters.proxy;
+    const proxy = decodeURI(event.pathParameters.proxy);
     var params = {
       Bucket: BUCKET,
       Key: proxy,
     };
 
-    // authorize the request
-    // TODO: verify JWT
-    // https://github.com/awslabs/aws-support-tools/blob/master/Cognito/decode-verify-jwt/decode-verify-jwt.ts
     // identify requesting user
     const requestingUserID = event.requestContext.identity.cognitoAuthenticationProvider.split(
       ":CognitoSignIn:"
     )[1];
-    console.log("requestingUserID", requestingUserID);
 
     // lookup file where proxy == s3Path
-    const { data, errors } = await gql(listFiles, "ListFiles", {
-      filter: { s3Path: { eq: proxy } },
+    const { data, errors } = await gql(getFile, "GetFile", {
+      id: proxy,
     });
-    console.log("results", data.listFiles.items);
-    const requestedFile = data.listFiles.items[0];
-    console.log("requestedFile", requestedFile);
+    if (errors) throw Error(JSON.stringify(errors));
+
+    const requestedFile = data.getFile;
 
     // check if requester is a file owner/viewer
     if (requestedFile.owner == requestingUserID) {
@@ -96,17 +91,19 @@ exports.handler = async (event) => {
 
     var origimage = await s3.getObject(params).promise();
 
-    var response = {
-      headers: { "Content-Type": "blob" },
-      statusCode: 200,
-      body:
-        "data:" +
-        origimage.ContentType +
-        ";base64," +
-        origimage.Body.toString("base64"),
-      isBase64Encoded: true,
-    };
-    return response;
+    try {
+      var response = {
+        headers: {
+          "Content-Type": origimage.ContentType,
+        },
+        statusCode: 200,
+        body: origimage.Body.toString("base64"),
+        isBase64Encoded: true,
+      };
+      return response;
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   // GRAPHQL
