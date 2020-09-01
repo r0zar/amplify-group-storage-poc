@@ -7,7 +7,6 @@ export const getFile = /* GraphQL */ `
       id
       name
       description
-      s3Path
       owner
       viewers
       createdAt
@@ -26,36 +25,6 @@ export const listFiles = /* GraphQL */ `
         id
         name
         description
-        s3Path
-        owner
-        viewers
-        createdAt
-        updatedAt
-      }
-      nextToken
-    }
-  }
-`;
-export const filesByS3Path = /* GraphQL */ `
-  query FilesByS3Path(
-    $s3Path: String
-    $sortDirection: ModelSortDirection
-    $filter: ModelFileFilterInput
-    $limit: Int
-    $nextToken: String
-  ) {
-    filesByS3Path(
-      s3Path: $s3Path
-      sortDirection: $sortDirection
-      filter: $filter
-      limit: $limit
-      nextToken: $nextToken
-    ) {
-      items {
-        id
-        name
-        description
-        s3Path
         owner
         viewers
         createdAt

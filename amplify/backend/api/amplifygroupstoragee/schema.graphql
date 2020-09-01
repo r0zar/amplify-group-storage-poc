@@ -18,7 +18,6 @@ type File
   id: ID!
   name: String!
   description: String
-  s3Path: String!
   owner: ID
   viewers: [ID]
 }
