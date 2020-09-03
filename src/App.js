@@ -7,7 +7,7 @@ import S3ImageUpload from "./S3ImageUpload";
 
 import Amplify, { API, Auth } from "aws-amplify";
 import { withAuthenticator, AmplifySignOut } from "@aws-amplify/ui-react";
-import awsconfig from "./aws-exports";
+import awsExports from "./aws-exports";
 import {
   Button,
   Avatar,
@@ -22,8 +22,7 @@ import Description from "@material-ui/icons/Description";
 import { AvatarGroup } from "@material-ui/lab";
 import { readFile, getMyFiles, updateMyFile } from "./api";
 import { makeStyles, withStyles } from "@material-ui/core/styles";
-
-Amplify.configure(awsconfig);
+Amplify.Auth.configure(awsExports);
 
 const StyledBadge = withStyles((theme) => ({
   badge: {

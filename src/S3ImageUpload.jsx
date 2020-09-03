@@ -6,16 +6,18 @@ import {
   setPrivateImage,
   getPrivateImage,
 } from "./storage";
-import { newFile } from "./api";
+import { newFile, uploadFile } from "./api";
 import CloudUpload from "@material-ui/icons/CloudUpload";
 
 const S3ImageUpload = ({ setFile }) => {
   const onChange = async (e) => {
     const file = e.target.files[0];
-    const response = await setPrivateImage(file);
-    const url = await getPrivateImage(response.key);
-    const fileData = await newFile({ key: response.key, url });
-    setFile(fileData);
+    const resp = await uploadFile("test_file");
+    console.log(resp);
+    // const response = await setPrivateImage(file);
+    // const url = await getPrivateImage(response.key);
+    // const fileData = await newFile({ key: response.key, url });
+    // setFile(fileData);
   };
 
   return (

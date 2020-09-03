@@ -90,7 +90,7 @@
 				"Timeout": "25",
 				"Code": {
 					"S3Bucket": "amplify-amplifygroupstoragee-dev-132204-deployment",
-					"S3Key": "amplify-builds/amplifygroupstoragee69518006-5a51756d76776453756d-build.zip"
+					"S3Key": "amplify-builds/amplifygroupstoragee69518006-492f746f4c6378744832-build.zip"
 				}
 			}
 		},

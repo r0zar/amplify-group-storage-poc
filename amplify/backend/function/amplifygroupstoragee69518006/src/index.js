@@ -8,6 +8,7 @@ const AWS = require("aws-sdk");
 const https = require("https");
 const urlParse = require("url").URL;
 const { getFile } = require("./graphql/queries");
+const { createFile } = require("./graphql/mutations");
 
 const REGION = process.env.REGION;
 const GRAPHQL_API_ENDPOINT =
@@ -56,53 +57,93 @@ const resolvers = {
 
 exports.handler = async (event) => {
   // API GATEWAY
-  if (event.resource == "/files/{proxy+}" && event.httpMethod == "GET") {
-    const proxy = decodeURI(event.pathParameters.proxy);
-    var params = {
-      Bucket: BUCKET,
-      Key: proxy,
-    };
 
-    // identify requesting user
-    const requestingUserID = event.requestContext.identity.cognitoAuthenticationProvider.split(
-      ":CognitoSignIn:"
-    )[1];
+  console.log(event);
 
-    // lookup file where proxy == s3Path
-    const { data, errors } = await gql(getFile, "GetFile", {
-      id: proxy,
-    });
-    if (errors) throw Error(JSON.stringify(errors));
+  // identify requesting user
+  const requestingUserID = event.requestContext.identity.cognitoAuthenticationProvider.split(
+    ":CognitoSignIn:"
+  )[1];
 
-    const requestedFile = data.getFile;
-
-    // check if requester is a file owner/viewer
-    if (requestedFile.owner == requestingUserID) {
-      console.log("Owner is requesting their own file");
-    } else if (
-      requestedFile.viewers &&
-      requestedFile.viewers.some((id) => id == requestingUserID)
-    ) {
-      console.log("Viewer is requesting a file shared with them");
-    } else {
-      console.error("File access request failed authorization");
-      return { statusCode: 401, body: "Not authorized" };
-    }
-
-    var origimage = await s3.getObject(params).promise();
-
-    try {
-      var response = {
-        headers: {
-          "Content-Type": origimage.ContentType,
-        },
-        statusCode: 200,
-        body: origimage.Body.toString("base64"),
-        isBase64Encoded: true,
+  if (event.resource == "/files/{proxy+}") {
+    if (event.httpMethod == "GET") {
+      var proxy = decodeURI(event.pathParameters.proxy);
+      var params = {
+        Bucket: BUCKET,
+        Key: proxy,
       };
-      return response;
-    } catch (error) {
-      console.error(error);
+
+      // lookup file where proxy == id
+      const { data, errors } = await gql(getFile, "GetFile", {
+        id: proxy,
+      });
+      if (errors) throw Error(JSON.stringify(errors));
+
+      const requestedFile = data.getFile;
+
+      // check if requester is a file owner/viewer
+      if (requestedFile.owner == requestingUserID) {
+        console.log("Owner is requesting their own file");
+      } else if (
+        requestedFile.viewers &&
+        requestedFile.viewers.some((id) => id == requestingUserID)
+      ) {
+        console.log("Viewer is requesting a file shared with them");
+      } else {
+        console.error("File access request failed authorization");
+        return { statusCode: 401, body: "Not authorized" };
+      }
+
+      var origimage = await s3.getObject(params).promise();
+
+      try {
+        var response = {
+          headers: {
+            "Content-Type": origimage.ContentType,
+          },
+          statusCode: 200,
+          body: origimage.Body.toString("base64"),
+          isBase64Encoded: true,
+        };
+        return response;
+      } catch (error) {
+        console.error(error);
+      }
+    }
+  }
+
+  if (event.resource == "/files") {
+    if (event.httpMethod == "POST") {
+      const key = event.body;
+
+      var params = {
+        Bucket: BUCKET,
+        Key: `private/${REGION}:${requestingUserID}/${key}`,
+      };
+
+      // const { data, errors } = await gql(createFile, "CreateFile", {
+      //   input: {
+      //     id: params.Key,
+      //     name: "",
+      //     description: "",
+      //     owner: "",
+      //     viewers: [],
+      //   },
+      // });
+
+      // var origimage = await s3.putObject(params).promise();
+
+      // console.log(origimage);
+
+      try {
+        var response = {
+          statusCode: 200,
+          body: "success",
+        };
+        return response;
+      } catch (error) {
+        console.error(error);
+      }
     }
   }
 

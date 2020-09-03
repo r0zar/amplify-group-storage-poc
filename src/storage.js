@@ -1,26 +1,24 @@
+import Amplify, { Storage } from "aws-amplify";
+import awsExports from "./aws-exports";
 
-import Amplify, { Storage } from 'aws-amplify';
-import awsExports from './aws-exports';
-Amplify.configure(awsExports);
-
-export const getProfileImage = fileName => {
-  return Storage.get(fileName, { level: 'protected' });
+export const getProfileImage = (fileName) => {
+  return Storage.get(fileName, { level: "protected" });
 };
 
-export const setProfileImage = file => {
+export const setProfileImage = (file) => {
   return Storage.put(file.name, file, {
-    level: 'protected',
+    level: "protected",
     contentType: file.type,
   });
 };
 
-export const getPrivateImage = fileName => {
-  return Storage.get(fileName, { level: 'private' });
+export const getPrivateImage = (fileName) => {
+  return Storage.get(fileName, { level: "private" });
 };
 
-export const setPrivateImage = file => {
+export const setPrivateImage = (file) => {
   return Storage.put(file.name, file, {
-    level: 'private',
+    level: "private",
     contentType: file.type,
   });
 };
