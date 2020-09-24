@@ -22,6 +22,7 @@ import Description from "@material-ui/icons/Description";
 import { AvatarGroup } from "@material-ui/lab";
 import { readFile, getMyFiles, updateMyFile } from "./api";
 import { makeStyles, withStyles } from "@material-ui/core/styles";
+import FileList from "./FileList";
 
 Amplify.configure(awsconfig);
 
@@ -125,28 +126,7 @@ export default withAuthenticator(function App() {
           </Typography>
         </Grid>
         <Grid item>
-          <Box display="flex" justifyContent="center">
-            <AvatarGroup max={7} spacing="small">
-              {files.map((file) => (
-                <StyledBadge
-                  key={file.id}
-                  overlap="circle"
-                  anchorOrigin={{
-                    vertical: "bottom",
-                    horizontal: "right",
-                  }}
-                  badgeContent={file.viewers && (file.viewers.length || 1)}
-                >
-                  <Avatar
-                    src={file.src}
-                    style={{ width: "100px", height: "100px" }}
-                  >
-                    <Description />
-                  </Avatar>
-                </StyledBadge>
-              ))}
-            </AvatarGroup>
-          </Box>
+          <FileList files={files} />
         </Grid>
         <Grid item>
           <Grid container justify="space-between">
